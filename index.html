@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pure Deen</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Noto+Naskh+Arabic:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:        #0d0f12;
+    --bg-card:   #141720;
+    --bg-glass:  rgba(255,255,255,0.04);
+    --border:    rgba(255,255,255,0.08);
+    --gold:      #c9a96e;
+    --gold-dim:  rgba(201,169,110,0.5);
+    --white:     #f5f3ef;
+    --white-dim: rgba(245,243,239,0.55);
+    --white-xs:  rgba(245,243,239,0.25);
+    --btn-bg:    rgba(255,255,255,0.07);
+    --btn-hover: rgba(255,255,255,0.12);
+    --radius:    999px;
+    --radius-sm: 20px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── STARFIELD / NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── GLOW ORBS ── */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb-1 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(50,65,100,0.35) 0%, transparent 70%);
+    top: -150px; left: 50%;
+    transform: translateX(-50%);
+    animation: float1 14s ease-in-out infinite;
+  }
+  .orb-2 {
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, rgba(201,169,110,0.06) 0%, transparent 70%);
+    bottom: 10%; right: -80px;
+    animation: float2 18s ease-in-out infinite;
+  }
+  @keyframes float1 { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(25px)} }
+  @keyframes float2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+
+  /* ── PAGE WRAPPER ── */
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 64px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* ════════════════════
+     HEADER / HERO
+  ════════════════════ */
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeUp .8s ease both;
+  }
+
+  .bismillah {
+    font-family: 'Noto Naskh Arabic', serif;
+    font-size: 18px;
+    color: var(--gold);
+    opacity: 0.7;
+    margin-bottom: 28px;
+    letter-spacing: 0.04em;
+  }
+
+  /* Avatar ring */
+  .avatar-wrap {
+    position: relative;
+    width: 100px; height: 100px;
+    margin-bottom: 20px;
+  }
+  .avatar-ring {
+    position: absolute; inset: -4px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--gold), transparent 40%, var(--gold) 70%, transparent 90%);
+    animation: spin 8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .avatar-inner {
+    position: relative;
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    background: var(--bg-card);
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-style: italic;
+    color: var(--gold);
+    z-index: 1;
+  }
+
+  .hero-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(34px, 9vw, 52px);
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: var(--white);
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+
+  .hero-handle {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--white-dim);
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+  }
+
+  .hero-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--white-dim);
+    letter-spacing: 0.04em;
+  }
+
+  /* ════════════════════
+     SECTION LABEL
+  ════════════════════ */
+  .section-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+    opacity: 0.8;
+    align-self: flex-start;
+    width: 100%;
+  }
+
+  /* ════════════════════
+     DIVIDER
+  ════════════════════ */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    margin: 36px 0;
+  }
+
+  /* ════════════════════
+     LINK BUTTONS
+  ════════════════════ */
+  .links-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .link-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 22px;
+    background: var(--btn-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--white);
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    transition: background 0.22s ease, border-color 0.22s ease, transform 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+    width: 100%;
+  }
+  .link-btn:active,
+  .link-btn:hover {
+    background: var(--btn-hover);
+    border-color: rgba(255,255,255,0.16);
+    transform: scale(1.015);
+  }
+
+  .link-btn-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .link-icon {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .link-icon svg {
+    width: 18px; height: 18px;
+    fill: var(--white);
+  }
+  .link-icon.gold { background: rgba(201,169,110,0.12); }
+  .link-icon.gold svg { fill: var(--gold); }
+
+  .link-label { font-size: 14px; font-weight: 400; color: var(--white); }
+  .link-sub   { font-size: 11px; color: var(--white-dim); margin-top: 1px; }
+
+  .link-arrow {
+    font-size: 16px;
+    color: var(--white-xs);
+    flex-shrink: 0;
+    transition: color 0.2s, transform 0.2s;
+  }
+  .link-btn:hover .link-arrow {
+    color: var(--white-dim);
+    transform: translateX(3px);
+  }
+
+  /* ════════════════════
+     99 NAMES CARD
+  ════════════════════ */
+  .series-card {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 28px 24px;
+    margin-bottom: 8px;
+  }
+
+  .series-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .series-arabic {
+    font-family: 'Noto Naskh Arabic', serif;
+    font-size: 26px;
+    color: var(--gold);
+    line-height: 1.4;
+  }
+
+  .series-title-en {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--white);
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+
+  .series-badge {
+    padding: 5px 14px;
+    background: rgba(201,169,110,0.1);
+    border: 1px solid rgba(201,169,110,0.25);
+    border-radius: var(--radius);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    color: var(--gold);
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Progress */
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .progress-label { font-size: 11px; color: var(--white-dim); letter-spacing: 0.1em; }
+  .progress-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    color: var(--white);
+  }
+  .progress-num span { font-size: 13px; color: var(--white-dim); }
+
+  .progress-track {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 44.4%;
+    background: linear-gradient(to right, rgba(201,169,110,0.5), var(--gold));
+    border-radius: 3px;
+    position: relative;
+  }
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 6px; height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(201,169,110,0.8);
+  }
+
+  .progress-hint { font-size: 10px; color: var(--white-xs); letter-spacing: 0.1em; }
+
+  /* Recent names mini row */
+  .names-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .name-pill {
+    flex: 1; min-width: 80px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 8px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--white-dim);
+    transition: border-color 0.2s;
+  }
+  .name-pill.active {
+    border-color: rgba(201,169,110,0.35);
+    background: rgba(201,169,110,0.06);
+  }
+  .name-pill .pill-ar {
+    font-family: 'Noto Naskh Arabic', serif;
+    font-size: 16px;
+    color: var(--white);
+    display: block;
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+  .name-pill.active .pill-ar { color: var(--gold); }
+  .name-pill .pill-num {
+    display: block;
+    font-size: 9px;
+    color: var(--white-xs);
+    letter-spacing: 0.08em;
+    margin-bottom: 3px;
+  }
+
+  /* ════════════════════
+     COLLAB SECTION
+  ════════════════════ */
+  .collab-card {
+    width: 100%;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 28px 24px;
+    text-align: center;
+  }
+
+  .collab-heading {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--white);
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+
+  .collab-text {
+    font-size: 13px;
+    color: var(--white-dim);
+    line-height: 1.8;
+    margin-bottom: 22px;
+    letter-spacing: 0.02em;
+  }
+
+  .tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 22px;
+  }
+  .tag {
+    padding: 7px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 11px;
+    color: var(--white-dim);
+    letter-spacing: 0.1em;
+    background: rgba(255,255,255,0.03);
+  }
+
+  .collab-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 15px 36px;
+    background: var(--white);
+    color: var(--bg);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: var(--radius);
+    transition: opacity 0.2s, transform 0.18s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .collab-btn:hover { opacity: 0.9; transform: scale(1.015); }
+  .collab-btn:active { opacity: 0.85; transform: scale(0.99); }
+
+  /* ════════════════════
+     FOOTER
+  ════════════════════ */
+  .footer {
+    margin-top: 52px;
+    text-align: center;
+  }
+  .footer-text {
+    font-size: 11px;
+    color: var(--white-xs);
+    letter-spacing: 0.12em;
+  }
+  .footer-text a { color: var(--gold-dim); text-decoration: none; }
+
+  /* ════════════════════
+     ANIMATIONS
+  ════════════════════ */
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(20px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+  .fade-1 { animation: fadeUp .7s ease .15s both; }
+  .fade-2 { animation: fadeUp .7s ease .28s both; }
+  .fade-3 { animation: fadeUp .7s ease .40s both; }
+  .fade-4 { animation: fadeUp .7s ease .52s both; }
+  .fade-5 { animation: fadeUp .7s ease .64s both; }
+
+  /* ════════════════════
+     RESPONSIVE
+  ════════════════════ */
+  @media (max-width: 400px) {
+    .page { padding: 48px 16px 64px; }
+    .hero-name { font-size: 36px; }
+    .link-btn { padding: 14px 18px; }
+    .series-card, .collab-card { padding: 22px 18px; }
+  }
+
+  @media (min-width: 700px) {
+    .page { padding: 80px 20px 100px; }
+    .hero-name { font-size: 58px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="page">
+
+  <!-- ══ HERO ══ -->
+  <div class="hero">
+    <p class="bismillah">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
+
+    <div class="avatar-wrap">
+      <div class="avatar-ring"></div>
+      <div class="avatar-inner">PD</div>
+    </div>
+
+    <h1 class="hero-name">Pure Deen</h1>
+    <p class="hero-handle">@pureedeenn_</p>
+    <p class="hero-tagline">Growing in Deen together.</p>
+  </div>
+
+  <!-- ══ SOCIAL LINKS ══ -->
+  <p class="section-label fade-1">Find me on</p>
+  <div class="links-section fade-1">
+
+    <a class="link-btn" href="https://instagram.com/pureedeenn_" target="_blank">
+      <div class="link-btn-left">
+        <div class="link-icon">
+          <!-- Instagram icon -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="link-label">Instagram</div>
+          <div class="link-sub">@pureedeenn_</div>
+        </div>
+      </div>
+      <span class="link-arrow">›</span>
+    </a>
+
+    <a class="link-btn" href="#" target="_blank">
+      <div class="link-btn-left">
+        <div class="link-icon">
+          <!-- YouTube icon -->
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="link-label">YouTube</div>
+          <div class="link-sub">Coming soon</div>
+        </div>
+      </div>
+      <span class="link-arrow">›</span>
+    </a>
+
+  </div>
+
+  <div class="divider fade-2"></div>
+
+  <!-- ══ 99 NAMES SERIES ══ -->
+  <p class="section-label fade-2">Currently Running</p>
+  <div class="series-card fade-2">
+
+    <div class="series-top">
+      <div>
+        <div class="series-arabic">أسماء الله الحسنى</div>
+        <div class="series-title-en">99 Names of Allah</div>
+      </div>
+      <div class="series-badge">Active</div>
+    </div>
+
+    <div class="progress-row">
+      <span class="progress-label">PROGRESS</span>
+      <span class="progress-num">44 <span>/ 99</span></span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill"></div>
+    </div>
+    <p class="progress-hint">44% complete · Updated regularly</p>
+
+    <div class="names-row">
+      <div class="name-pill">
+        <span class="pill-ar">الرَّحْمَنُ</span>
+        <span class="pill-num">01</span>
+        Ar-Rahmān
+      </div>
+      <div class="name-pill">
+        <span class="pill-ar">الرَّقِيبُ</span>
+        <span class="pill-num">43</span>
+        Ar-Raqīb
+      </div>
+      <div class="name-pill active">
+        <span class="pill-ar">الْمُجِيبُ</span>
+        <span class="pill-num">44 · Latest</span>
+        Al-Mujīb
+      </div>
+    </div>
+
+  </div>
+
+  <div class="divider fade-3"></div>
+
+  <!-- ══ COLLABORATE ══ -->
+  <p class="section-label fade-3">Work With Me</p>
+  <div class="collab-card fade-3">
+    <h2 class="collab-heading">Let's grow<br/>together</h2>
+    <p class="collab-text">
+      Interested in collaborations, brand partnerships, or reposts?<br/>
+      All inquiries welcome — reach out on Instagram.
+    </p>
+
+    <div class="tags-row">
+      <span class="tag">Brand Collaborations</span>
+      <span class="tag">Reposts</span>
+      <span class="tag">Partnerships</span>
+      <span class="tag">Deen Projects</span>
+    </div>
+
+    <a class="collab-btn" href="https://instagram.com/pureedeenn_" target="_blank">
+      DM on Instagram
+    </a>
+  </div>
+
+  <!-- ══ FOOTER ══ -->
+  <div class="footer fade-4">
+    <p class="footer-text">
+      © 2025 Pure Deen · Built by <a href="https://zeta-labs.dev" target="_blank">ZetaLabs</a>
+    </p>
+  </div>
+
+</div>
+</body>
+</html>
